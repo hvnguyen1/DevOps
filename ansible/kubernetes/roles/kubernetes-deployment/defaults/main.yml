@@ -1,0 +1,10 @@
+---
+# defaults file for kubernetes-deployment
+
+# Master and worker node details
+
+kube-master_ip: 192.168.1.170
+kube-node_ips:
+        - 192.168.1.21
+        - 192.168.1.24
+

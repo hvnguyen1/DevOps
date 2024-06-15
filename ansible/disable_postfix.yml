@@ -1,0 +1,12 @@
+---
+- name: Disable Postfix Mail Server
+  hosts: all
+  become: yes  # This enables sudo privileges for the playbook
+
+  tasks:
+    - name: Stop and Disable Postfix Service
+      service:
+        name: postfix
+        state: stopped
+        enabled: no
+

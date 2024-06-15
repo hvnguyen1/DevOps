@@ -1,0 +1,59 @@
+---
+- name: Remove Kubernetes Services
+  hosts: kubernetes
+  become: yes  # Use 'become' to execute commands as sudo/root
+
+  tasks:
+    - name: Stop Kubernetes Services
+      systemd:
+        name: "{{ item }}"
+        state: stopped
+      loop:
+        - kubelet
+        - kube-proxy
+        - kube-scheduler
+        - kube-controller-manager
+      become: true
+      ignore_errors: yes # Ignore errors if the service is not found
+
+    - name: Uninstall Kubernetes Components
+      shell: kubeadm reset -f
+      ignore_errors: yes
+      when: item == 'master'
+      with_items: "{{ ansible_play_hosts_all }}"
+
+    - name: Remove Kubernetes Packages
+      apt:
+        name: "{{ item }}"
+        state: absent
+      loop:
+        - kubeadm
+        - kubelet
+        - kubectl
+      when: ansible_os_family == 'Debian'
+      ignore_errors: yes
+
+    - name: Remove Kubernetes Packages
+      yum:
+        name: "{{ item }}"
+        state: absent
+      loop:
+        - kubeadm
+        - kubelet
+        - kubectl
+      when: ansible_os_family == 'RedHat'
+      ignore_errors: yes
+
+
+    - name: Remove Kubernetes Directories
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - /etc/kubernetes
+        - /var/lib/kubelet
+        - /var/lib/kubernetes
+        - /var/lib/cni
+        - /etc/cni
+        - /opt/cni
+

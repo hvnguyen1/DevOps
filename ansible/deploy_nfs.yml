@@ -1,0 +1,35 @@
+---
+- name: Deploy NFS server to Kubernetes Cluster
+  hosts: kube-master # Update with the appropriate target node where you want to deploy NFS
+  become: yes
+  gather_facts: yes
+
+  tasks:
+    - name: Install NFS server
+      apt:
+        name: nfs-kernel-server
+        state: present
+
+    - name: Create NFS export directory
+      file:
+        path: /srv/kube
+        state: directory
+
+    - name: Configure NFS exports
+      blockinfile:
+        path: /etc/exports
+        marker: "# BEGIN NFS Configuration"
+        block: |
+          /srv/kube 192.168.1.0/24(rw,no_subtree_check,no_root_squash)
+      notify: Reload NFS
+
+    - name: Enable and start NFS server
+      systemd:
+        name: nfs-server
+        enabled: yes
+        state: started
+
+  handlers:
+    - name: Reload NFS
+      command: exportfs -ar
+

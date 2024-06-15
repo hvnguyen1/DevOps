@@ -1,0 +1,8 @@
+---
+- hosts: k8s-workers
+  become: yes
+  roles:
+    - k8s-workerNodes
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+

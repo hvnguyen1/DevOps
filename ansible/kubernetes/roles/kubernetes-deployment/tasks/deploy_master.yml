@@ -1,0 +1,38 @@
+- name: Update /etc/hosts
+  lineinfile:
+    path: /etc/hosts
+    line: "192.168.1.170 kube-master01"
+  become: yes
+
+- name: Pull Kubernetes control plane images
+  command: kubeadm config images pull
+  become: yes
+
+- name: Initialize the Kubernetes master
+  command: "kubeadm init --pod-network-cidr=192.168.0.0/16 --cri-socket unix:///run/containerd/containerd.sock --ignore-preflight-errors=all"
+  become: yes
+
+- name: Configure kubectl for the current user
+  file:
+    path: "/root/.kube"
+    state: directory
+    owner: "root"
+    group: "root"
+    mode: '0755'
+
+- name: Copy /etc/kubernetes/admin.conf to ~/.kube/config
+  copy:
+    src: "/etc/kubernetes/admin.conf"
+    dest: "/root/.kube/config"
+    remote_src: yes
+    owner: "root"
+    group: "root"
+    mode: "0600"
+
+- name: Deploy Calico networking
+  command: "kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/tigera-operator.yaml"
+  become: yes
+
+- name: Apply the default resources necessary to configure Calico
+  command: "kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.25.0/manifests/custom-resources.yaml"
+  become: yes
