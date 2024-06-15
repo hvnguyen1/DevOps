@@ -1,0 +1,50 @@
+- name: Install dependencies (curl, gnupg2, software-properties-common, apt-transport-https, ca-certificates)
+  apt:
+    name:
+      - curl
+      - gnupg2
+      - software-properties-common
+      - apt-transport-https
+      - ca-certificates
+    state: present
+
+- name: Add Docker Repository
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+    state: present
+
+- name: Import Docker GPG key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+
+- name: Update APT
+  apt:
+    update_cache: yes
+
+- name: Install Containerd
+  apt:
+    name: containerd.io
+    state: present
+
+- name: Copy the default Containerd configuration
+  copy:
+    src: files/config.toml
+    dest: /etc/containerd/config.toml
+
+- name: Change file owner and permissions
+  file:
+   path: /etc/containerd/config.toml
+   owner: root
+   mode: '0644'
+
+- name: Configure Containerd to use Systemd Cgroup Driver
+  lineinfile:
+    path: /etc/containerd/config.toml
+    line: '  SystemdCgroup = true'
+    insertafter: '  runc'
+
+- name: Restart Containerd
+  systemd:
+    name: containerd
+    state: restarted
+

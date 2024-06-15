@@ -1,0 +1,1 @@
+If you encounter error messages related to Role, ClusterRole, and ClusterRoleBinding while deploying with ansible-playbook, please disregard them as some may already exist in the cluster. These errors do not impact your deployment in any way.

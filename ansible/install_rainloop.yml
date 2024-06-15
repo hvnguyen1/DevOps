@@ -1,0 +1,54 @@
+---
+- name: Install RainLoop webmail and dependencies
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Install PHP and other required packages
+      apt:
+        name:
+          - php-fpm
+          - php-mbstring
+          - php-xml
+          - php-zip
+          - php-curl
+          - nginx
+          - git
+        state: present
+
+    - name: Clone RainLoop from GitHub
+      git:
+        repo: https://github.com/RainLoop/rainloop-webmail.git
+        dest: /var/www/html/rainloop
+        version: v1.17.0
+      tags:
+        - clone
+
+    - name: Set permissions for the RainLoop directory
+      file:
+        path: /var/www/html/rainloop
+        state: directory
+        mode: '0755'
+        recurse: yes
+        owner: www-data
+        group: www-data
+
+    - name: Create an nginx configuration file for RainLoop
+      copy:
+        src: /Users/ben.le/gpt/ansible/rainloop.conf
+        dest: /etc/nginx/sites-available/rainloop.conf
+      notify: restart nginx
+
+    - name: Enable the RainLoop nginx site
+      file:
+        src: /etc/nginx/sites-available/rainloop.conf
+        dest: /etc/nginx/sites-enabled/rainloop.conf
+        state: link
+      notify: restart nginx
+
+  handlers:
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted
+

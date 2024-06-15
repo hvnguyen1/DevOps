@@ -1,0 +1,7 @@
+---
+# NOTE: To generate a new Certificate Authorities; run this command on master node: $ sudo kubeadm token create --print-join-command
+#
+
+- name: Join the worker node to the Kubernetes cluster
+  command: kubeadm join 192.168.1.170:6443 --token oik7s7.3hsqhnkdb8cskuj3 --discovery-token-ca-cert-hash sha256:90dba077e30c76f86d2c10efdebca1d90fe86d0922219b245e639217bf39bf31
+

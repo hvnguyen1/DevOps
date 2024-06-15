@@ -1,0 +1,53 @@
+---
+- name: Install Jenkins
+  hosts: jenkins
+  become: true
+  vars:
+    user: "jenkins"
+    group:
+      - docker
+
+  tasks:
+    - name: Install Java
+      apt:
+        name: openjdk-11-jdk
+        state: present
+
+    - name: Add Jenkins repository key
+      apt_key:
+        url: https://pkg.jenkins.io/debian-stable/jenkins.io.key
+        state: present
+
+    - name: Add Jenkins repository
+      apt_repository:
+        repo: deb https://pkg.jenkins.io/debian-stable binary/
+        state: present
+
+    - name: Install Jenkins
+      apt:
+        name: jenkins
+        state: present
+        update_cache: true
+
+    - name: Start Jenkins service
+      service:
+        name: jenkins
+        state: started
+        enabled: true
+
+#    - name: Install Docker
+#      apt: 
+#        name: docker.io
+#        state: present
+
+#    - name: Start Docker service
+#      service:
+#        name: docker
+#        state: started
+      
+    - name: Adding Jenkins user to docker group
+      user:
+        name: "{{ user }}"
+        groups: "{{ group }}"
+        append: true
+

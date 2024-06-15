@@ -1,0 +1,43 @@
+---
+- name: Install dependencies (curl, vim, git, wget, apt-transport-https)
+  apt:
+    name:
+      - curl
+      - vim
+      - git
+      - wget
+      - apt-transport-https
+    state: present
+
+- name: Add Kubernetes repository to apt
+  apt_repository:
+    repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+    state: present
+
+- name: Download the Kubernetes GPG key
+  get_url:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    dest: /tmp/kubernetes-apt-key.gpg
+  register: download_result
+
+- name: Import the Kubernetes GPG key
+  command: apt-key add /tmp/kubernetes-apt-key.gpg
+  when: download_result.changed
+
+- name: Install kubeadm, kubelet, and kubectl
+  apt:
+    name:
+      - kubeadm
+      - kubelet
+      - kubectl
+    state: present
+
+- name: Hold Kubeadm, Kubectl, and Kubelet packages
+  command: apt-mark hold kubelet kubeadm kubectl
+
+- name: Enable Kubelet to start on boot
+  systemd:
+    name: kubelet
+    enabled: yes
+    state: started
+

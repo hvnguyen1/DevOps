@@ -1,0 +1,13 @@
+- name: Disable Swap
+  command: "/usr/sbin/swapoff -a"
+  register: result
+  ignore_errors: True
+
+- name: Ensure swap is disabled on boot
+  ansible.builtin.replace:
+    path: /etc/fstab
+    regexp: '^.*swap.*$'
+    replace: ''
+  when: "ansible_swaptotal_mb > 0"
+
+  

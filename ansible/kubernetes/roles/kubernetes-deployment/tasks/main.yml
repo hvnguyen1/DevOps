@@ -1,0 +1,25 @@
+---
+- name: Disable Swap
+  include: disable_swap.yml
+  tags: disable_swap
+
+- name: Enable br_netfilter and overlay modules
+  include: enable_kernel.yml
+  tags: kernel_module
+
+- name: Install containerd
+  include: install_containerd.yml
+  tags: install_containerd
+
+- name: Install Kubernetes Components
+  include: install_kube_components.yml
+  tags: install_kubernetes
+
+- name: Deploy Kubernetes Master
+  include: deploy_master.yml
+  tags: deploy_master
+
+- name: Add node(s)
+  include: add_nodes.yml
+  tags: add_nodes
+

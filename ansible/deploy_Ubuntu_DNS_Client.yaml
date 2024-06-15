@@ -1,0 +1,16 @@
+---
+- name: Copy /etc/resolvconf/resolv.conf.d/head file 
+  hosts: all
+  become: yes  # This enables sudo privileges for the playbook
+
+  tasks:
+    - name: Copy /etc/resolvconf/resolv.conf.d/head
+      copy:
+        src: /etc/resolvconf/resolv.conf.d/head
+        dest: /etc/resolvconf/resolv.conf.d/head
+        owner: root
+        group: root
+        mode: 0644
+    - name: Update the resovle config
+      command: "resolvconf -u"
+        
